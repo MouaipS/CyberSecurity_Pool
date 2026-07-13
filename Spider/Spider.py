@@ -1,5 +1,10 @@
 import argparse
 import urllib.request, urllib.error
+from bs4 import BeautifulSoup
+
+def extract_images(html: str, url_page: str) -> list[str]:
+    soup = BeautifulSoup(html, "html.parser")
+
 
 def fetch_page(url : str):
     try:
@@ -35,6 +40,7 @@ def spider():
     args = parse_args()
     html = fetch_page(args.url)
     print(html)
+    extract_images(args.url, html)
 
 
 
