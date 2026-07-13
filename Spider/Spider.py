@@ -6,6 +6,9 @@ def fetch_page(url : str):
         with urllib.request.urlopen(url, timeout = 10) as response:
             html = response.read().decode()
         return html
+    except ValueError:
+        print("Url format invalid")
+        return None
     except urllib.error.HTTPError:
         print("Error HTTP")
         return None
