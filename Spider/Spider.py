@@ -41,7 +41,13 @@ def is_valid_image(url: str) -> bool:
     return clean.lower().endswith(VALID_EXT)
 
 
-def extract_images(url: str, html: str) -> list[str]:
+def is_valid_url(url_target: str, url: str) -> bool:
+    if urlparse(url_target).netloc !=  urlparse(url).netloc:
+        return False
+    return True
+
+
+def extract_images(url: str, html: str) -> set[str]:
     soup = BeautifulSoup(html, "html.parser")
     src_list = []
     for link in soup.find_all('img'):
@@ -51,7 +57,22 @@ def extract_images(url: str, html: str) -> list[str]:
         absolute_url = urljoin(url, src)
         if is_valid_image(absolute_url):
             src_list.append(absolute_url)
-    return (src_list)
+    return set(src_list)
+
+
+def extract_links(url: str, html: str) -> set[str]:
+    soup = BeautifulSoup(html, "html.parser")
+    src_list = []
+    for link in soup.find_all('a'):
+        src = link.get("href")
+        if src is None or src.startswith(("#", "mailto:", "tel:")):
+            continue
+        absolute_url = urljoin(url, src)
+        if is_valid_image(absolute_url):
+            continue
+        if is_valid_url(absolute_url, url):
+            src_list.append(absolute_url)
+    return set(src_list)
 
 
 def fetch_page(url: str):
@@ -88,14 +109,20 @@ def parse_args():
 
 
 def spider():
-    setup_https()
+    #setup_https()
     args = parse_args()
-    html = fetch_page(args.url)
-    if html is None:
-        return
-    list = extract_images(args.url, html)
-    for elem in list:
-        download_image(elem, ".")
+    #html = fetch_page(args.url)
+    #if html is None:
+        #return
+    html = open("test_page.html").read()
+    images = extract_images("http://example.com/test_page.html", html)
+    print(images)
+
+    links = extract_links("http://example.com/test_page.html", html)
+    print(links)
+
+    #for elem in images:
+    #    download_image(elem, args.path)
 
 
 if __name__ == "__main__":
