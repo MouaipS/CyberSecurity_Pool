@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Page de test</title>
+</head>
+<body>
+    <h1>Test extract_images / extract_links</h1>
+
+    <!-- chemin relatif simple -->
+    <img src="images/photo1.jpg" alt="photo relative">
+
+    <!-- chemin relatif avec ./ -->
+    <img src="./images/photo2.PNG" alt="photo relative avec point">
+
+    <!-- chemin absolu (même domaine) -->
+    <img src="http://example.com/static/photo3.gif" alt="photo absolue">
+
+    <!-- URL protocol-relative -->
+    <img src="//example.com/static/photo4.bmp" alt="photo protocol-relative">
+
+    <!-- avec des paramètres d'URL -->
+    <img src="images/photo5.jpeg?v=2&size=large" alt="photo avec query string">
+
+    <!-- extension non gérée par le sujet -->
+    <img src="images/icon.svg" alt="icone non prise en charge">
+
+    <!-- image en data URL, à ignorer -->
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB" alt="image inline">
+
+    <!-- doublon volontaire de photo1.jpg -->
+    <img src="images/photo1.jpg" alt="doublon">
+
+    <!-- lien vers une autre page du même site -->
+    <a href="page2.html">Page suivante</a>
+
+    <!-- lien vers une page externe -->
+    <a href="http://autresite.com/ailleurs.html">Site externe</a>
+
+    <!-- lien direct vers un fichier image -->
+    <a href="images/photo6.jpg">Voir l'image directement</a>
+
+</body>
+</html>
