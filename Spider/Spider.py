@@ -1,5 +1,6 @@
 import argparse
-import urllib.request, ssl
+import urllib.request
+import ssl
 import urllib.error
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
@@ -16,6 +17,9 @@ def setup_https() -> None:
     context = ssl.create_default_context()
     https_handler = urllib.request.HTTPSHandler(context=context)
     opener = urllib.request.build_opener(https_handler)
+    opener.addheaders = [
+        ("User-Agent", "Mozilla/5.0")
+    ]
     urllib.request.install_opener(opener)
 
 
@@ -89,10 +93,8 @@ def spider():
     html = fetch_page(args.url)
     if html is None:
         return
-    #html = open("test_page.html").read()
-    
     list = extract_images(args.url, html)
-    for elem in list :
+    for elem in list:
         download_image(elem, ".")
 
 
