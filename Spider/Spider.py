@@ -6,14 +6,13 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 import os
 from urllib.parse import urlparse
+from collections import deque
 
 
 VALID_EXT = (".jpg", ".jpeg", ".png", ".gif", ".bmp")
 
 
 def setup_https() -> None:
-    """Configure un opener global avec un contexte SSL par défaut,
-    utilisé automatiquement par urlopen ET urlretrieve."""
     context = ssl.create_default_context()
     https_handler = urllib.request.HTTPSHandler(context=context)
     opener = urllib.request.build_opener(https_handler)
@@ -23,12 +22,16 @@ def setup_https() -> None:
     urllib.request.install_opener(opener)
 
 
-def download_image(url: str, path: str) -> None:
-    os.makedirs(path, exist_ok=True)
-    filename = os.path.basename(urlparse(url).path)
+def download_image(url: str, path: str, flat: bool) -> None:
+    if flat:
+        filepath = os.path.join(path, os.path.basename(urlparse(url).path))
+    else:
+        filepath = os.path.join(path, urlparse(url).path.removeprefix("/"))
+    filename = os.path.basename(filepath)
     if not filename:
         return
-    filepath = os.path.join(path, filename)
+    folder = os.path.dirname(filepath)
+    os.makedirs(folder, exist_ok=True)
     try:
         urllib.request.urlretrieve(url, filepath)
         print(f"Downloaded: {filename}")
@@ -100,6 +103,7 @@ def parse_args():
     parser.add_argument("-r", help="recursively deep", action="store_true")
     parser.add_argument("-l", "--level", type=int, default=None)
     parser.add_argument("-p", "--path", type=str, default="./data/")
+    parser.add_argument("-f", "--flat", help="no dir", action="store_true")
     args = parser.parse_args()
     if args.level is not None and not args.r:
         parser.error("-l need to be used with -r")
@@ -109,20 +113,26 @@ def parse_args():
 
 
 def spider():
-    #setup_https()
+    setup_https()
     args = parse_args()
-    #html = fetch_page(args.url)
-    #if html is None:
-        #return
-    html = open("test_page.html").read()
-    images = extract_images("http://example.com/test_page.html", html)
-    print(images)
-
-    links = extract_links("http://example.com/test_page.html", html)
-    print(links)
-
-    #for elem in images:
-    #    download_image(elem, args.path)
+    visited = set()
+    queue = deque([(args.url, 0)])
+    while queue:
+        (url_current, deep) = queue.popleft()
+        if url_current in visited:
+            continue
+        visited.add(url_current)
+        html = fetch_page(url_current)
+        if html is None:
+            continue
+        images = extract_images(url_current, html)
+        links = extract_links(url_current, html)
+        if args.r and deep < args.level:
+            for elem in links:
+                if elem not in visited:
+                    queue.append((elem, deep+1))
+        for elem in images:
+            download_image(elem, args.path, args.flat)
 
 
 if __name__ == "__main__":
