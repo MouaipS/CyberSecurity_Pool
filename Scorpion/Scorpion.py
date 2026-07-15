@@ -75,9 +75,12 @@ def display_metadata(filepath: str):
     print(f"File size : {stat.st_size} bytes")
     print(f"Last modified : {format_timestamp(stat.st_mtime)}")
     print(f"Last changed  : {format_timestamp(stat.st_ctime)}")
-    with Image.open(filepath) as image:
-        display_image_data(image)
-        display_image_exif(image)
+    try:
+        with Image.open(filepath) as image:
+            display_image_data(image)
+            display_image_exif(image)
+    except OSError as e:
+        print(f"Error: {e}")
 
 
 def scorpion():
